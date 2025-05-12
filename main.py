@@ -1,26 +1,25 @@
 from fastapi import FastAPI, UploadFile, Form
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-import spacy
+import spacy, uuid, os
 import PyPDF2
 import networkx as nx
 import matplotlib.pyplot as plt
-import os
-import uuid
+import threading
+import subprocess
 
 app = FastAPI()
 
-# Allow CORS for React
+# Allow CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, use your frontend URL here
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-import spacy.cli
-spacy.cli.download("en_core_web_sm")
 
+spacy.cli.download("en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
 
 def extract_text_from_pdf(uploaded_file):
@@ -49,31 +48,20 @@ def extract_relationships(text):
             edges.append((entities[i], "related_to", entities[j]))
 
     return edges
-import networkx as nx
-import matplotlib.pyplot as plt
-import uuid
 
 def create_graph_image(edges):
-    import matplotlib.pyplot as plt
-    import networkx as nx
-
     G = nx.DiGraph()
-
     for edge in edges:
         if len(edge) == 2:
             G.add_edge(edge[0], edge[1])
         else:
             G.add_edge(edge[0], edge[2], label=edge[1])
 
-    # Better layout for large graphs
     pos = nx.spring_layout(G, k=1.8, iterations=200, seed=42)
-
-    # Prepare image
     plt.figure(figsize=(24, 18), dpi=300)
     nx.draw_networkx_nodes(G, pos, node_size=2500, node_color="lightblue")
     nx.draw_networkx_edges(G, pos, arrows=True, arrowstyle='-|>', arrowsize=20, edge_color='gray', width=1.5)
     nx.draw_networkx_labels(G, pos, font_size=9, font_family="sans-serif")
-
     edge_labels = nx.get_edge_attributes(G, 'label')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8, label_pos=0.5)
 
@@ -84,8 +72,6 @@ def create_graph_image(edges):
     plt.close()
 
     return output_path
-
-
 
 @app.post("/upload/")
 async def upload(file: UploadFile = None, text: str = Form(None)):
@@ -98,8 +84,14 @@ async def upload(file: UploadFile = None, text: str = Form(None)):
 
     edges = extract_relationships(text_content)
     image_path = create_graph_image(edges)
-    return {"image_url": f"http://localhost:10000/{image_path}"}
+    return {"image_url": f"/{image_path}"}
 
 @app.get("/{image_name}")
 def get_image(image_name: str):
     return FileResponse(image_name, media_type="image/png")
+
+# ✅ Launch Streamlit in background
+def run_streamlit():
+    subprocess.Popen(["streamlit", "run", "frontend.py", "--server.port", "8080"])
+
+threading.Thread(target=run_streamlit).start()

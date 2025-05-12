@@ -4,4 +4,7 @@ spacy
 PyPDF2
 networkx
 matplotlib
+streamlit
+requests
+pillow
 python-multipart
