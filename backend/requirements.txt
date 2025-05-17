@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+spacy
+PyPDF2
+networkx
+matplotlib
