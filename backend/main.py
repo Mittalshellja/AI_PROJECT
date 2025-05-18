@@ -94,7 +94,3 @@ async def upload(file: UploadFile = None, text: str = Form(None)):
 def get_image(image_name: str):
     return FileResponse(image_name, media_type="image/png")
 
-def run_streamlit():
-    subprocess.Popen(["streamlit", "run", "frontend.py", "--server.port", "8080"])
-
-threading.Thread(target=run_streamlit).start()
