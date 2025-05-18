@@ -24,24 +24,19 @@ if input_mode == "PDF":
         else:
             st.error("Failed to generate graph.")
 else:
-  input_text = st.text_area("Enter your text here")
+    input_text = st.text_area("Enter your text here")
+    if st.button("Generate Graph") and input_text:
+        response = requests.post(
+            f"{BACKEND_URL}/upload/",
+            data={"text": input_text}
+        )
+        if response.status_code == 200 and "image_url" in response.json():
+           image_path = response.json()["image_url"]  # This includes "/static/graph_xxx.png"
+           full_image_url = f"{BACKEND_URL}{image_path}"
+           st.image(full_image_url, caption="Knowledge Graph", use_container_width =True)
 
-if "graph_generated" not in st.session_state:
-    st.session_state.graph_generated = False
 
-if st.button("Generate Graph") and input_text:
-    response = requests.post(
-        f"{BACKEND_URL}/upload/",
-        data={"text": input_text}
-    )
-    if response.status_code == 200 and "image_url" in response.json():
-        image_path = response.json()["image_url"]
-        st.session_state.image_url = f"{BACKEND_URL}{image_path}"
-        st.session_state.graph_generated = True
-    else:
-        st.error("Failed to generate graph.")
+           st.image(full_image_url, caption="Knowledge Graph", use_container_width =True)
 
-# Display only after generation
-if st.session_state.graph_generated:
-    st.image(st.session_state.image_url, caption="Knowledge Graph", use_column_width=True)
-
+        else:
+            st.error("Failed to generate graph.")
