@@ -4,7 +4,7 @@ from PIL import Image
 import io
 
 # ✅ Replace this with your actual backend Render URL
-BACKEND_URL = "https://fastapi-kg.onrender.com"
+BACKEND_URL = "https://ai-project-osay.onrender.com"
 
 st.title("Knowledge Graph Generator")
 st.write("Upload a PDF or type/paste text to generate a knowledge graph.")
