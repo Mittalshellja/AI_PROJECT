@@ -18,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 spacy.cli.download("en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
@@ -84,13 +87,13 @@ async def upload(file: UploadFile = None, text: str = Form(None)):
 
     edges = extract_relationships(text_content)
     image_path = create_graph_image(edges)
-    return {"image_url": f"/{image_path}"}
+    return {"image_url": f"/static/{image_path}"}
+
 
 @app.get("/{image_name}")
 def get_image(image_name: str):
     return FileResponse(image_name, media_type="image/png")
 
-# ✅ Launch Streamlit in background
 def run_streamlit():
     subprocess.Popen(["streamlit", "run", "frontend.py", "--server.port", "8080"])
 

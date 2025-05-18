@@ -3,8 +3,7 @@ import requests
 from PIL import Image
 import io
 
-# ✅ Replace this with your actual backend Render URL
-BACKEND_URL = "https://fastapi-kg.onrender.com"
+BACKEND_URL = "https://ai-project-osay.onrender.com"
 
 st.title("Knowledge Graph Generator")
 st.write("Upload a PDF or type/paste text to generate a knowledge graph.")
@@ -32,7 +31,12 @@ else:
             data={"text": input_text}
         )
         if response.status_code == 200 and "image_url" in response.json():
-            image_url = response.json()["image_url"]
-            st.image(image_url, caption="Knowledge Graph", use_column_width=True)
+           image_path = response.json()["image_url"]  # This includes "/static/graph_xxx.png"
+           full_image_url = f"{BACKEND_URL}{image_path}"
+           st.image(full_image_url, caption="Knowledge Graph", use_column_width=True)
+
+
+           st.image(full_image_url, caption="Knowledge Graph", use_column_width=True)
+
         else:
             st.error("Failed to generate graph.")
